@@ -1,0 +1,253 @@
+import { useEffect, useRef, useState } from 'react'
+import { gsap, ScrollTrigger, getLenis } from '../lib/gsap'
+import { useScrollStage } from '../context/ScrollStage'
+import useMagnetic from '../hooks/useMagnetic'
+
+function NavLink({ label, href, active, onClick, onMobile }) {
+  const ref = useMagnetic({ strength: 0.5 })
+  return (
+    <a
+      ref={ref}
+      href={href}
+      onClick={(e) => {
+        onClick(e)
+        onMobile?.()
+      }}
+      data-cursor="view"
+      className={`relative font-['JetBrains_Mono'] text-[0.7rem] tracking-[0.08em] uppercase transition-colors duration-300 ${
+        onMobile ? 'block py-4 text-[1.1rem]' : ''
+      }`}
+      style={{ color: active ? 'var(--accent)' : 'var(--muted)' }}
+    >
+      <span className="relative z-10">{label}</span>
+      <span
+        aria-hidden="true"
+        className="absolute -bottom-1 left-0 h-px origin-left bg-[var(--accent)] transition-transform duration-300 ease-out"
+        style={{ width: '100%', transform: active ? 'scaleX(1)' : 'scaleX(0)' }}
+      />
+    </a>
+  )
+}
+
+export default function Header() {
+  const { sections, activeIndex } = useScrollStage()
+  const headerRef = useRef(null)
+  const overlayRef = useRef(null)
+  const [scrolled, setScrolled] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
+  const lastY = useRef(0)
+  const hidden = useRef(false)
+  const scrolledRef = useRef(false)
+  const isCoarse = typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches
+
+  useEffect(() => {
+    const header = headerRef.current
+    if (!header) return
+
+    const ctx = gsap.context(() => {
+      const mm = gsap.matchMedia()
+      // Auto-hide only on desktop (>=1024px). On mobile the header stays put
+      // so the menu button + brand remain reachable while reading.
+      mm.add('(min-width: 1024px)', () => {
+        const st = ScrollTrigger.create({
+          start: 0,
+          end: 'max',
+          onUpdate: (self) => {
+            const y = self.scroll()
+            const goingDown = y > lastY.current
+            // Only re-render when the scrolled state actually flips.
+            const next = y > 40
+            if (next !== scrolledRef.current) {
+              scrolledRef.current = next
+              setScrolled(next)
+            }
+            if (y > 200 && goingDown && !hidden.current) {
+              hidden.current = true
+              gsap.to(header, { yPercent: -120, duration: 0.4, ease: 'power3.out', overwrite: 'auto' })
+            } else if ((!goingDown || y < 200) && hidden.current) {
+              hidden.current = false
+              gsap.to(header, { yPercent: 0, duration: 0.4, ease: 'power3.out', overwrite: 'auto' })
+            }
+            lastY.current = y
+          },
+        })
+        return () => st.kill()
+      })
+      // Mobile/tablet: just toggle the glass state, no hide.
+      mm.add('(max-width: 1023px)', () => {
+        const st = ScrollTrigger.create({
+          start: 0,
+          end: 'max',
+          onUpdate: (self) => {
+            const next = self.scroll() > 40
+            if (next !== scrolledRef.current) {
+              scrolledRef.current = next
+              setScrolled(next)
+            }
+          },
+        })
+        return () => st.kill()
+      })
+    }, header)
+
+    return () => ctx.revert()
+  }, [])
+
+  // Lock scroll while the mobile menu is open.
+  useEffect(() => {
+    const lenis = getLenis()
+    if (menuOpen) {
+      lenis?.stop()
+      document.body.style.overflow = 'hidden'
+    } else {
+      lenis?.start()
+      document.body.style.overflow = ''
+    }
+    return () => {
+      lenis?.start()
+      document.body.style.overflow = ''
+    }
+  }, [menuOpen])
+
+  // Animate the overlay in/out.
+  useEffect(() => {
+    const overlay = overlayRef.current
+    if (!overlay) return
+    gsap.to(overlay, {
+      autoAlpha: menuOpen ? 1 : 0,
+      duration: 0.35,
+      ease: 'power3.out',
+      overwrite: 'auto',
+    })
+    gsap.fromTo(
+      overlay.querySelectorAll('[data-menu-item]'),
+      { y: 20, opacity: 0 },
+      { y: 0, opacity: 1, duration: 0.4, stagger: 0.05, delay: menuOpen ? 0.1 : 0, ease: 'power3.out', overwrite: 'auto' }
+    )
+  }, [menuOpen])
+
+  // Close on Escape.
+  useEffect(() => {
+    if (!menuOpen) return
+    const onKey = (e) => e.key === 'Escape' && setMenuOpen(false)
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [menuOpen])
+
+  const handleNav = (e, id) => {
+    e.preventDefault()
+    const el = document.getElementById(id)
+    if (!el) return
+    const lenis = getLenis()
+    if (lenis) lenis.scrollTo(el, { offset: 0, duration: 1.1 })
+    else el.scrollIntoView({ behavior: 'smooth' })
+  }
+
+  const closeMenu = () => setMenuOpen(false)
+
+  return (
+    <header
+      ref={headerRef}
+      className="fixed top-0 left-0 z-[9500] w-full transition-[background-color,border-color] duration-300"
+      style={{
+        backgroundColor: scrolled ? (isCoarse ? 'rgba(11,12,14,0.92)' : 'rgba(11,12,14,0.6)') : 'transparent',
+        backdropFilter: scrolled && !isCoarse ? 'blur(12px) saturate(120%)' : 'none',
+        WebkitBackdropFilter: scrolled && !isCoarse ? 'blur(12px) saturate(120%)' : 'none',
+        borderBottom: scrolled ? '1px solid var(--line)' : '1px solid transparent',
+      }}
+    >
+      <div className="mx-auto flex max-w-[1400px] items-center justify-between px-6 py-4 lg:px-[110px]">
+        <a
+          href="#hero"
+          onClick={(e) => handleNav(e, 'hero')}
+          data-cursor="view"
+          className="inline-flex items-center"
+          aria-label="Straw Hat Studios — back to top"
+        >
+          <img src="/logo.svg" alt="Straw Hat Studios logo" className="h-10 w-10" />
+        </a>
+
+        <nav className="hidden items-center gap-8 lg:flex" aria-label="Primary">
+          {sections.map((s, i) => (
+            <NavLink
+              key={s.id}
+              label={s.label}
+              href={`#${s.id}`}
+              active={i === activeIndex}
+              onClick={(e) => handleNav(e, s.id)}
+            />
+          ))}
+        </nav>
+
+        <div className="flex items-center gap-3">
+          <a
+            href="#contact"
+            onClick={(e) => handleNav(e, 'contact')}
+            data-cursor="view"
+            className="hidden font-['JetBrains_Mono'] text-[0.7rem] tracking-[0.08em] uppercase text-[var(--accent)] min-h-[44px] items-center sm:inline-flex"
+            style={{ border: '1px solid var(--accent)', padding: '0.6rem 1rem', borderRadius: '999px' }}
+          >
+            Let’s talk
+          </a>
+
+          {/* Mobile menu toggle */}
+          <button
+            type="button"
+            onClick={() => setMenuOpen((v) => !v)}
+            aria-expanded={menuOpen}
+            aria-controls="mobile-menu"
+            aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+            data-cursor="view"
+            className="flex h-11 w-11 items-center justify-center lg:hidden"
+            style={{ border: '1px solid var(--line)', borderRadius: '999px' }}
+          >
+            <span className="relative block h-3 w-5">
+              <span
+                className="absolute left-0 top-0 block h-px w-5 bg-[var(--paper)] transition-transform duration-300"
+                style={{ transform: menuOpen ? 'translateY(6px) rotate(45deg)' : 'none' }}
+              />
+              <span
+                className="absolute bottom-0 left-0 block h-px w-5 bg-[var(--paper)] transition-transform duration-300"
+                style={{ transform: menuOpen ? 'translateY(-6px) rotate(-45deg)' : 'none' }}
+              />
+            </span>
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile / tablet overlay menu */}
+      <div
+        id="mobile-menu"
+        ref={overlayRef}
+        className="fixed inset-0 z-[-1] flex flex-col justify-center bg-[var(--bg)] px-6 lg:hidden"
+        style={{ opacity: 0, visibility: 'hidden' }}
+      >
+        <nav className="flex flex-col" aria-label="Mobile">
+          {sections.map((s, i) => (
+            <NavLink
+              key={s.id}
+              label={s.label}
+              href={`#${s.id}`}
+              active={i === activeIndex}
+              onClick={(e) => handleNav(e, s.id)}
+              onMobile={closeMenu}
+            />
+          ))}
+          <a
+            href="#contact"
+            onClick={(e) => {
+              handleNav(e, 'contact')
+              closeMenu()
+            }}
+            data-cursor="view"
+            data-menu-item
+            className="mt-6 inline-flex min-h-[48px] items-center justify-center font-['JetBrains_Mono'] text-[0.8rem] tracking-[0.08em] uppercase text-[var(--accent)]"
+            style={{ border: '1px solid var(--accent)', borderRadius: '999px' }}
+          >
+            Let’s talk
+          </a>
+        </nav>
+      </div>
+    </header>
+  )
+}

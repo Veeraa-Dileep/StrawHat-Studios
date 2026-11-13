@@ -1,0 +1,17 @@
+:root {
+  --bg: #0B0C0E;
+  --surface: #16171A;
+  --paper: #F2F0EB;
+  --accent: #FF5A1F;
+  --line: #3A3D42;
+  --muted: #8B8F98;
+
+  --font-display: 'Clash Display', sans-serif;
+  --font-body: 'Satoshi', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* Elevation system — layered shadows for real depth on dark surfaces. */
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px -8px rgba(0, 0, 0, 0.5);
+  --shadow-lift: 0 4px 8px rgba(0, 0, 0, 0.45), 0 24px 48px -12px rgba(0, 0, 0, 0.6);
+  --shadow-accent: 0 8px 40px -12px rgba(255, 90, 31, 0.35);
+}
