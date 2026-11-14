@@ -21,7 +21,6 @@ const Contact = lazy(() => import('./sections/Contact'))
 
 const SECTIONS = [
   { id: 'hero', label: 'Intro' },
-  { id: 'marquee', label: 'Disciplines' },
   { id: 'work', label: 'Work' },
   { id: 'process', label: 'Process' },
   { id: 'pricing', label: 'Pricing' },

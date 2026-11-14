@@ -28,7 +28,7 @@ export default function Work() {
 
   return (
     <SectionTransition
-      index={2}
+      index={1}
       id="work"
       bg="var(--bg)"
       className="py-[160px] max-lg:py-[80px] px-6 lg:px-10"

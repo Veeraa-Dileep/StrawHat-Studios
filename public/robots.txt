@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://strawhatstudios.com/sitemap.xml
+Sitemap: https://thestrawhatstudios.com/sitemap.xml

@@ -2,8 +2,8 @@ import { useEffect, useRef } from 'react'
 import { gsap, getLenis } from '../lib/gsap'
 
 const LABELS = [
-  'DESIGN', 'FRONT-END', 'SEO', 'DEPLOYMENT',
-  'RESPONSIVE', 'PERFORMANCE', 'ACCESSIBILITY',
+  'CUSTOM DESIGN', 'WEBSITES', 'LANDING PAGES', 'MOBILE-FIRST',
+  'FAST LOADING', 'LAUNCH & HOSTING', 'ONGOING SUPPORT',
 ]
 
 export default function Marquee() {
@@ -63,6 +63,7 @@ export default function Marquee() {
 
   return (
     <section
+      id="marquee"
       data-section="marquee"
       aria-hidden="true"
       className="relative overflow-hidden py-4"

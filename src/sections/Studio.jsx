@@ -4,8 +4,6 @@ import { gsap } from '../lib/gsap'
 import { EASE_DRAFT } from '../lib/easings'
 import MonoLabel from '../components/MonoLabel'
 import SectionTransition from '../components/SectionTransition'
-import StatGrid from '../components/StatGrid'
-import AchievementGrid from '../components/AchievementGrid'
 import SkillsBoard from '../components/SkillsBoard'
 import { canRender3D } from '../lib/capabilities'
 
@@ -50,25 +48,28 @@ export default function Studio() {
   return (
     <SectionTransition
       index={4}
+      id="studio"
       bg="var(--bg)"
       className="py-[160px] max-lg:py-[80px] px-6 lg:px-10"
     >
       <div ref={sectionRef} className="max-w-[1400px] mx-auto space-y-[120px] max-lg:space-y-16">
         {/* Studio Mission */}
-        <div className="max-w-[60ch]">
+        <div className="max-lg:max-w-[60ch]">
           <div className="studio-reveal" style={{ opacity: 0 }}>
             <BlockLabel>STUDIO / 01</BlockLabel>
           </div>
-          <h2 className="studio-reveal font-['Clash_Display'] font-semibold text-[clamp(2rem,3.5vw,3.5rem)] leading-[1] text-[var(--paper)] mb-8" style={{ opacity: 0 }}>
-            We build websites that belong on the internet — designed, engineered, and shipped by one studio.
-          </h2>
-          <div className="space-y-4 text-[1.125rem] text-[var(--muted)] leading-[1.6]">
-            <p className="studio-reveal" style={{ opacity: 0 }}>
-              No handoffs between design and development. No template debt. No "we'll fix it later." Every project ships with design, front-end build, and technical SEO done by the same hands — so the final product works as a growth asset, not a brochure.
-            </p>
-            <p className="studio-reveal" style={{ opacity: 0 }}>
-              We work with founders and teams who see their website as infrastructure worth investing in. If that sounds like you, let's talk.
-            </p>
+          <div className="lg:grid lg:grid-cols-2 lg:gap-16 lg:items-start">
+            <h2 className="studio-reveal font-['Clash_Display'] font-semibold text-[clamp(2rem,3.5vw,3.5rem)] leading-[1] text-[var(--paper)] mb-8 lg:mb-0" style={{ opacity: 0 }}>
+              A website that carries your reputation — designed, built and launched by one studio.
+            </h2>
+            <div className="space-y-4 text-[1.125rem] text-[var(--muted)] leading-[1.6]">
+              <p className="studio-reveal" style={{ opacity: 0 }}>
+                Prospects look you up before they ever book a call. We build the site that holds up in that moment: clear about what you do, credible at a glance, and fast on every device. Design, build, domain and hosting are handled by the same hands, so there's nothing to coordinate and nothing to chase.
+              </p>
+              <p className="studio-reveal" style={{ opacity: 0 }}>
+                We work with independent consultants, fractional executives, coaches and other expert-led practices. If your work is your reputation, let's talk.
+              </p>
+            </div>
           </div>
         </div>
 
@@ -84,40 +85,28 @@ export default function Studio() {
             </h3>
             <div className="space-y-4 text-[1.125rem] text-[var(--muted)] leading-[1.6]">
               <p className="studio-reveal" style={{ opacity: 0 }}>
-                I started Straw Hat Studios after five years of building websites for small businesses — from local shops to funded startups — and seeing the same gap repeatedly: design agencies that don't code, developers who don't design, and SEO treated as an afterthought.
+                I'm Dileep. I trained as a chemical engineer, taught myself to build for the web, and haven't stopped shipping since — a scientific journal platform, a custom CRM a sales team now runs on, and the site for a marketing agency, Fuel Studios.
               </p>
               <p className="studio-reveal" style={{ opacity: 0 }}>
-                I built this studio to close that gap. Every project ships with design, front-end engineering, and technical SEO done by the same hands — no handoffs, no template debt, no "we'll fix it later."
+                I started Straw Hat Studios for people whose work speaks louder than their website does: consultants, coaches and independent experts who are excellent at what they do and tired of a site that undersells it.
               </p>
               <p className="studio-reveal" style={{ opacity: 0 }}>
-                The name comes from a simple belief: the best work happens when you're willing to wear the hat, get in the arena, and ship. No spectators.
+                Here, one person owns the whole job — design, build, launch, domain and hosting. No agency layers, no handoffs, and you always know who you're talking to.
               </p>
               <p className="studio-reveal" style={{ opacity: 0 }}>
-                Before founding the studio, I shipped a scientific journal platform (Indicus Zoologica), built a custom CRM adopted by a sales team (Pyngyn), and delivered a motion-led brand site for a marketing agency (Fuel Studios). Self-taught, B.E. Electronics & Communication — but the real education was shipping.
+                The name is a belief I work by: put the hat on, get in the arena, and ship.
               </p>
             </div>
           </div>
 
           {/* 3D ID Card — desktop only */}
-          <div className="hidden lg:block w-[800px] h-[1000px] shrink-0 studio-reveal" style={{ opacity: 0, overflow: 'visible' }}>
+          <div className="hidden lg:block w-[800px] h-[1000px] shrink-0 lg:-mb-[420px] studio-reveal" style={{ opacity: 0, overflow: 'visible' }}>
             {canRender3D() && (
               <Suspense fallback={null}>
                 <IDCardScene />
               </Suspense>
             )}
           </div>
-        </div>
-
-        {/* Animated statistics */}
-        <div className="studio-reveal" style={{ opacity: 0 }}>
-          <BlockLabel as="h3">BY THE NUMBERS</BlockLabel>
-          <StatGrid />
-        </div>
-
-        {/* Achievements */}
-        <div className="studio-reveal" style={{ opacity: 0 }}>
-          <BlockLabel as="h3">SELECTED ACHIEVEMENTS</BlockLabel>
-          <AchievementGrid />
         </div>
 
         {/* Interactive skills */}

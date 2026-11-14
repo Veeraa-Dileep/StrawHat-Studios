@@ -119,7 +119,7 @@ export default function ProjectShowcase({ project }) {
 
           <TechStack stack={project.stack} />
 
-          <ProjectActions name={project.name} url={project.url} github={project.github} />
+          <ProjectActions name={project.name} url={project.current ? null : project.url} />
 
           <button
             type="button"
@@ -148,15 +148,27 @@ export default function ProjectShowcase({ project }) {
                 background: `radial-gradient(120% 120% at 30% 20%, ${project.accent}33, transparent 60%), var(--surface)`,
               }}
             >
-              <div className="text-center">
-                <div
-                  className="font-['Clash_Display'] font-bold leading-none"
-                  style={{ fontSize: 'clamp(3rem, 7vw, 6rem)', color: 'var(--paper)' }}
-                >
-                  {project.initials}
+              {project.image ? (
+                <img
+                  src={project.image}
+                  alt={`${project.name} — ${project.desc}`}
+                  width={1440}
+                  height={900}
+                  loading="lazy"
+                  decoding="async"
+                  className="h-full w-full object-cover object-top"
+                />
+              ) : (
+                <div className="text-center">
+                  <div
+                    className="font-['Clash_Display'] font-bold leading-none"
+                    style={{ fontSize: 'clamp(3rem, 7vw, 6rem)', color: 'var(--paper)' }}
+                  >
+                    {project.initials}
+                  </div>
+                  <MonoLabel className="mt-3 text-[var(--muted)]">{project.name}</MonoLabel>
                 </div>
-                <MonoLabel className="mt-3 text-[var(--muted)]">{project.name}</MonoLabel>
-              </div>
+              )}
             </div>
           </BrowserMockup>
         </div>

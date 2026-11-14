@@ -1,7 +1,7 @@
-import { lazy, Suspense, useEffect, useRef, useState } from 'react'
+import { Fragment, lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { useGSAP } from '@gsap/react'
 import SplitType from 'split-type'
-import { gsap, ScrollTrigger } from '../lib/gsap'
+import { gsap, ScrollTrigger, getLenis } from '../lib/gsap'
 import { EASE_DRAFT, EASE_SNAP, EASE_SMOOTH, DURATION_REVEAL } from '../lib/easings'
 import MonoLabel from '../components/MonoLabel'
 import Button from '../components/Button'
@@ -14,7 +14,9 @@ import { canRender3D } from '../lib/capabilities'
 // chunk never loads on mobile / reduced-motion / no-WebGL (gated by canRender3D).
 const GlassBallScene = lazy(() => import('../three/GlassBallScene'))
 
-const HEADLINE = "We build websites that make your business belong on the internet"
+// Desktop shows one line per entry (breaks injected as responsive <br>s);
+// below lg the breaks are hidden so the sentence wraps naturally.
+const HEADLINE = ['Websites that', 'make your', 'expertise', 'easy to trust.']
 
 function HeroVisual() {
   const tiltRef = useTilt3D({ max: 10, scale: 1.03, perspective: 1000, lift: 40 })
@@ -41,7 +43,7 @@ function HeroVisual() {
   )
 
   return (
-    <div ref={wrapRef} className="relative hidden lg:block" style={{ width: '420px', height: '480px' }}>
+    <div ref={wrapRef} className="relative hidden lg:block pointer-events-auto" style={{ width: '420px', height: '480px' }}>
       <div
         ref={layerBackRef}
         className="absolute inset-0"
@@ -96,7 +98,7 @@ function Hero3DVisual() {
 
   return (
     <div
-      className="relative hidden lg:block overflow-hidden"
+      className="relative hidden lg:block overflow-hidden pointer-events-none"
       style={{
         width: '1080px',
         height: '660px',
@@ -122,26 +124,9 @@ function Hero3DVisual() {
   )
 }
 
-function AvailabilityBadge() {
-  return (
-    <div
-      data-hero="badge"
-      className="inline-flex items-center gap-2.5 px-3.5 py-2 rounded-full"
-      style={{ border: '1px solid var(--line)', backgroundColor: 'rgba(255,255,255,0.02)' }}
-    >
-      <span
-        className="relative flex h-2 w-2"
-        aria-hidden="true"
-      >
-        <span className="absolute inline-flex h-full w-full rounded-full opacity-60 animate-ping" style={{ backgroundColor: 'var(--accent)' }} />
-        <span className="relative inline-flex h-2 w-2 rounded-full" style={{ backgroundColor: 'var(--accent)' }} />
-      </span>
-      <MonoLabel className="text-[var(--muted)] text-[0.7rem]">Available for new work — 2026</MonoLabel>
-    </div>
-  )
-}
 
-function ScrollIndicator() {
+
+function ScrollIndicator({ className = '' }) {
   const ref = useRef(null)
 
   useGSAP(
@@ -158,7 +143,7 @@ function ScrollIndicator() {
     <div
       ref={ref}
       data-hero="scroll"
-      className="absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
+      className={`pointer-events-none flex flex-col items-center gap-2 ${className}`}
     >
       <span className="block w-px h-8" style={{ background: 'linear-gradient(var(--accent), transparent)' }} />
       <MonoLabel className="text-[var(--muted)] text-[0.6rem]">SCROLL</MonoLabel>
@@ -180,7 +165,10 @@ export default function Hero() {
   useGSAP(
     () => {
       const headline = headlineRef.current
-      const split = new SplitType(headline, { types: 'lines,words', tagName: 'span' })
+      // `words` only: building line wrappers would discard the responsive
+      // <br>s above (split-type drops non-word nodes). Word animation is
+      // unchanged — nothing styles or queries `.line` here.
+      const split = new SplitType(headline, { types: 'words', tagName: 'span' })
 
       // Intro timeline (paused) — plays when the preloader completes.
       const tl = gsap.timeline({ paused: true, defaults: { overwrite: 'auto' } })
@@ -207,8 +195,8 @@ export default function Hero() {
         )
         .fromTo(
           visualRef.current,
-          { opacity: 0, x: 40 + 210, yPercent: -50 },
-          { opacity: 1, x: 210, yPercent: -50, duration: 1, ease: EASE_SMOOTH },
+          { opacity: 0, x: 40 + 260, yPercent: -50 },
+          { opacity: 1, x: 260, yPercent: -50, duration: 1, ease: EASE_SMOOTH },
           0.45
         )
         .fromTo('[data-hero="scroll"]', { opacity: 0 }, { opacity: 1, duration: 0.4, ease: EASE_DRAFT }, 0.9)
@@ -225,9 +213,19 @@ export default function Hero() {
     { scope: rootRef }
   )
 
+  const handleSeeWork = (e) => {
+    e.preventDefault()
+    const target = document.getElementById('work')
+    if (!target) return
+    const lenis = getLenis()
+    if (lenis) lenis.scrollTo(target, { offset: 0, duration: 1.1 })
+    else target.scrollIntoView({ behavior: 'smooth' })
+  }
+
   return (
     <SectionTransition
       index={0}
+      id="hero"
       bg="var(--bg)"
       innerRef={rootRef}
       sectionName="hero"
@@ -235,7 +233,7 @@ export default function Hero() {
     >
       <div
         ref={visualRef}
-        className="absolute"
+        className="absolute pointer-events-none"
         style={{
           opacity: 0,
           perspective: '1200px',
@@ -256,7 +254,17 @@ export default function Hero() {
           ref={headlineRef}
           className="font-['Clash_Display'] font-bold text-[clamp(2.75rem,7.5vw,7.5rem)] leading-[0.95] text-[var(--paper)] max-w-[14ch]"
         >
-          {HEADLINE}
+          {HEADLINE.map((line, i) => (
+            <Fragment key={line}>
+              {line}
+              {i < HEADLINE.length - 1 && (
+                <>
+                  {' '}
+                  <br className="hidden lg:inline" />
+                </>
+              )}
+            </Fragment>
+          ))}
         </h1>
 
         {/* Mobile 2D visual — shown below headline on mobile only */}
@@ -300,20 +308,16 @@ export default function Hero() {
             className="text-[1.125rem] text-[var(--muted)] leading-[1.6] max-w-[50ch]"
             style={{ opacity: 0 }}
           >
-            Design, front-end build, and SEO — end to end, no handoffs.
+            Custom websites for independent consultants, fractional executives and coaches. Designed, built and launched end to end.
           </p>
 
           <div ref={ctaRef} style={{ opacity: 0 }}>
-            <Button href="#work">See the work</Button>
+            <Button href="#work" onClick={handleSeeWork}>See the work</Button>
           </div>
         </div>
 
-        <div ref={badgeRef} className="mt-8" style={{ opacity: 0 }}>
-          <AvailabilityBadge />
-        </div>
+        <ScrollIndicator className="absolute bottom-0 right-0" />
       </div>
-
-      <ScrollIndicator />
     </SectionTransition>
   )
 }

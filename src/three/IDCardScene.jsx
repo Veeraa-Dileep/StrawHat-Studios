@@ -21,9 +21,9 @@ function Band({ maxSpeed = 50, minSpeed = 10 }) {
   const [dragged, drag] = useState(false)
   const [hovered, hover] = useState(false)
 
-  useRopeJoint(fixed, j1, [[0, 0, 0], [0, 0, 0], 1])
-  useRopeJoint(j1, j2, [[0, 0, 0], [0, 0, 0], 1])
-  useRopeJoint(j2, j3, [[0, 0, 0], [0, 0, 0], 1])
+  useRopeJoint(fixed, j1, [[0, 0, 0], [0, 0, 0], 0.6])
+  useRopeJoint(j1, j2, [[0, 0, 0], [0, 0, 0], 0.6])
+  useRopeJoint(j2, j3, [[0, 0, 0], [0, 0, 0], 0.6])
   useSphericalJoint(j3, card, [[0, 0, 0], [0, 1.45, 0]])
 
   useEffect(() => {
@@ -103,7 +103,7 @@ function Band({ maxSpeed = 50, minSpeed = 10 }) {
       </group>
       <mesh ref={band}>
         <meshLineGeometry />
-        <meshLineMaterial color="#feca57" depthTest={false} resolution={[width, height]} useMap map={texture} repeat={[-3, 1]} lineWidth={2} transparent opacity={0.75} />
+        <meshLineMaterial color="#feca57" depthTest={false} resolution={[width, height]} useMap map={texture} repeat={[-2, 1]} lineWidth={2} transparent opacity={0.75} />
       </mesh>
     </>
   )

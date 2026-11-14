@@ -8,22 +8,22 @@ const STEPS = [
   {
     id: '01',
     title: 'Design',
-    desc: 'Wireframes, moodboards, and a design system built for your brand — not a template.',
+    desc: 'Wireframes, moodboards and a design system built around your practice and your voice — never a template.',
   },
   {
     id: '02',
     title: 'Build',
-    desc: 'Clean, semantic code with animation that serves the content, not the other way around.',
+    desc: 'Clean, fast code, with motion that serves the content instead of competing with it.',
   },
   {
     id: '03',
-    title: 'SEO & Performance',
-    desc: 'Technical SEO, Core Web Vitals, and accessibility audits before launch — not as an afterthought.',
+    title: 'Test',
+    desc: 'Performance, accessibility and device testing before anything goes live, so launch day is uneventful.',
   },
   {
     id: '04',
-    title: 'Deploy & Support',
-    desc: 'CI/CD pipeline, analytics setup, and ongoing support so your site keeps performing.',
+    title: 'Launch & Support',
+    desc: 'Domain and hosting set up in your name, post-launch fixes, and an optional support window if you want us on call.',
   },
 ]
 
@@ -43,10 +43,15 @@ export default function Process() {
     const panels = track.querySelectorAll('.process-panel')
     if (!panels.length) return null
 
+    // One quickSetter per panel (deg unit) — created once, reused every tick.
+    const setPanels = gsap.utils.toArray(panels).map((panel) =>
+      gsap.quickSetter(panel, 'rotateY', 'deg')
+    )
+
     const totalWidth = track.scrollWidth
 
-    gsap.set(track, { perspective: 1200 })
-    gsap.set(panels, { transformStyle: 'preserve-3d' })
+    gsap.set(track, { perspective: 2400 })
+    gsap.set(panels, { transformStyle: 'preserve-3d', transformOrigin: 'center center' })
 
     const tl = gsap.timeline({
       scrollTrigger: {
@@ -59,13 +64,18 @@ export default function Process() {
         anticipatePin: 1,
         onUpdate: () => {
           const viewportCenter = window.innerWidth / 2
-          panels.forEach((panel) => {
-            const rect = panel.getBoundingClientRect()
-            const panelCenter = rect.left + rect.width / 2
-            const distance = (panelCenter - viewportCenter) / window.innerWidth
-            const rotateY = gsap.utils.clamp(-14, 14, distance * -22)
-            gsap.set(panel, { rotateY })
+          const vw = window.innerWidth
+
+          // Read phase: all rects first, no interleaved writes.
+          const angles = setPanels.map((setRotateY, i) => {
+            const rect = panels[i].getBoundingClientRect()
+            const distance = (rect.left + rect.width / 2 - viewportCenter) / vw
+            const t = gsap.utils.clamp(-1, 1, distance)
+            return -4 * Math.sign(t) * Math.pow(Math.abs(t), 1.6)
           })
+
+          // Write phase: one quickSetter call per panel.
+          setPanels.forEach((setRotateY, i) => setRotateY(angles[i]))
         },
       },
       defaults: { overwrite: 'auto' },
@@ -158,7 +168,7 @@ export default function Process() {
   }, [setupDesktop])
 
   return (
-    <SectionTransition index={3} bg="var(--bg)" className="relative">
+    <SectionTransition index={2} id="process" bg="var(--bg)" className="relative">
       <div ref={sectionRef} className="relative">
         <h2 className="sr-only">Process</h2>
         <div ref={pinnedRef} className="overflow-hidden">

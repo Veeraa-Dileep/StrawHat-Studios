@@ -88,23 +88,23 @@ export default function Preloader({ onComplete }) {
       aria-hidden="true"
     >
       <div ref={panelRef} className="relative flex flex-col items-center">
-        <div
-          ref={labelRef}
-          className="font-['JetBrains_Mono'] text-[0.7rem] tracking-[0.08em] uppercase mb-4"
-          style={{ color: 'var(--muted)', opacity: 0 }}
-        >
-          Drafting the page
-        </div>
+        <div className="relative flex flex-col items-center px-10 py-8">
+          <div
+            ref={labelRef}
+            className="font-['JetBrains_Mono'] text-[0.7rem] tracking-[0.08em] uppercase"
+            style={{ color: 'var(--muted)', opacity: 0 }}
+          >
+            Drafting the page
+          </div>
 
-        <div
-          ref={counterRef}
-          className="font-['Clash_Display'] font-semibold text-[3rem] leading-none"
-          style={{ color: 'var(--paper)' }}
-        >
-          000
-        </div>
+          <div
+            ref={counterRef}
+            className="font-['Clash_Display'] font-semibold text-[3rem] leading-none mt-3"
+            style={{ color: 'var(--paper)' }}
+          >
+            000
+          </div>
 
-        <div className="relative mt-6" style={{ width: '160px', height: '80px' }}>
           <div
             ref={lineTopRef}
             className="absolute top-0 left-0 w-full"

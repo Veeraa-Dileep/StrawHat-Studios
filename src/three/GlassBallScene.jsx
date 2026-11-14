@@ -262,7 +262,7 @@ function GlassScene() {
 
 export default function GlassBallScene() {
   return (
-    <Scene3D camera={{ position: [0, 0, 5], fov: 60 }}>
+    <Scene3D camera={{ position: [0, 0, 5], fov: 60 }} style={{ pointerEvents: 'none' }}>
       <Suspense fallback={null}>
         <GlassScene />
       </Suspense>

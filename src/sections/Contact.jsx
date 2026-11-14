@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react'
-import { gsap, ScrollTrigger } from '../lib/gsap'
+import { gsap } from '../lib/gsap'
 import { EASE_SMOOTH, EASE_DRAFT } from '../lib/easings'
 import MonoLabel from '../components/MonoLabel'
 import Button from '../components/Button'
@@ -9,6 +9,16 @@ import { SITE } from '../config/site'
 
 // Holographic sphere backdrop — lazy + gated (never loads on mobile/reduced-motion).
 const ContactScene = lazy(() => import('../three/ContactScene'))
+
+// Pricing CTAs dispatch 'pricing:select-package' (detail: { package }) — see
+// src/sections/Pricing.jsx. Contact pre-fills the mailto subject accordingly.
+const PACKAGE_SUBJECTS = {
+  build: 'Build enquiry',
+  'build-support': 'Build + Support enquiry',
+  custom: 'Custom quote request',
+}
+const DEFAULT_SUBJECT = 'Website enquiry'
+const MAIL_BODY = "Hi — I'm interested in this package. A little about my practice:"
 
 function ContactBackdrop3D() {
   const [use3D, setUse3D] = useState(false)
@@ -20,7 +30,11 @@ function ContactBackdrop3D() {
     <div
       aria-hidden="true"
       className="pointer-events-none absolute inset-0 z-0 hidden lg:block"
-      style={{ opacity: 0.9 }}
+      style={{
+        opacity: 0.9,
+        WebkitMaskImage: 'radial-gradient(ellipse 100% 100% at 50% 50%, #000 88%, transparent 100%)',
+        maskImage: 'radial-gradient(ellipse 100% 100% at 50% 50%, #000 88%, transparent 100%)',
+      }}
     >
       <Suspense fallback={null}>
         <ContactScene />
@@ -32,10 +46,20 @@ function ContactBackdrop3D() {
 export default function Contact() {
   const sectionRef = useRef(null)
   const headlineRef = useRef(null)
+  const pitchRef = useRef(null)
   const methodRef = useRef(null)
   const ctaRef = useRef(null)
   const footerRef = useRef(null)
   const gridLinesRef = useRef([])
+
+  // Package selected from the Pricing CTAs (null until one is clicked).
+  const [selectedPackage, setSelectedPackage] = useState(null)
+
+  useEffect(() => {
+    const onSelectPackage = (e) => setSelectedPackage(e.detail?.package ?? null)
+    window.addEventListener('pricing:select-package', onSelectPackage)
+    return () => window.removeEventListener('pricing:select-package', onSelectPackage)
+  }, [])
 
   useEffect(() => {
     const section = sectionRef.current
@@ -60,6 +84,7 @@ export default function Contact() {
         })
 
         tl.fromTo(headlineRef.current, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.7, ease: EASE_DRAFT }, 0.3)
+        tl.fromTo(pitchRef.current, { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.5, ease: EASE_DRAFT }, 0.42)
         tl.fromTo(methodRef.current, { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.5, ease: EASE_DRAFT }, 0.5)
         tl.fromTo(ctaRef.current, { opacity: 0, scale: 0.92, y: 12 }, { opacity: 1, scale: 1, y: 0, duration: 0.6, ease: EASE_SMOOTH }, 0.65)
         tl.fromTo(footerRef.current, { opacity: 0 }, { opacity: 1, duration: 0.4, ease: EASE_DRAFT }, 0.85)
@@ -69,7 +94,7 @@ export default function Contact() {
 
     mm.add('(prefers-reduced-motion: reduce)', () => {
       gsap.set(
-        [headlineRef.current, methodRef.current, ctaRef.current, footerRef.current, ...gridLinesRef.current],
+        [headlineRef.current, pitchRef.current, methodRef.current, ctaRef.current, footerRef.current, ...gridLinesRef.current],
         { opacity: 1, y: 0, scale: 1, strokeDashoffset: 0 }
       )
     })
@@ -77,9 +102,13 @@ export default function Contact() {
     return () => mm.revert()
   }, [])
 
+  const subject = PACKAGE_SUBJECTS[selectedPackage] || DEFAULT_SUBJECT
+  const mailto = `mailto:${SITE.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(MAIL_BODY)}`
+
   return (
     <SectionTransition
       index={5}
+      id="contact"
       bg="var(--bg)"
       className="relative min-h-[100svh] flex flex-col items-center justify-center py-[160px] max-lg:py-[80px] px-6"
     >
@@ -113,6 +142,13 @@ export default function Contact() {
           </h2>
 
           <p
+            ref={pitchRef}
+            className="text-[1.125rem] text-[var(--muted)] mb-3"
+          >
+            Tell us about your practice and what you want your website to do.
+          </p>
+
+          <p
             ref={methodRef}
             className="text-[1.125rem] text-[var(--muted)] mb-8"
           >
@@ -120,7 +156,7 @@ export default function Contact() {
           </p>
 
           <div ref={ctaRef}>
-            <Button href={`mailto:${SITE.email}`}>Start a conversation</Button>
+            <Button href={mailto}>Start a conversation</Button>
           </div>
         </div>
 
@@ -134,14 +170,9 @@ export default function Contact() {
 
           <div className="flex gap-2 max-lg:gap-4">
             <a
-              href={SITE.github}
-              aria-label="GitHub profile"
-              className="inline-flex min-h-[44px] items-center font-['JetBrains_Mono'] text-[0.7rem] tracking-[0.08em] text-[var(--muted)] uppercase hover:text-[var(--accent)] transition-colors duration-200 px-2"
-            >
-              GitHub
-            </a>
-            <a
               href={SITE.linkedin}
+              target="_blank"
+              rel="noopener noreferrer"
               aria-label="LinkedIn profile"
               className="inline-flex min-h-[44px] items-center font-['JetBrains_Mono'] text-[0.7rem] tracking-[0.08em] text-[var(--muted)] uppercase hover:text-[var(--accent)] transition-colors duration-200 px-2"
             >

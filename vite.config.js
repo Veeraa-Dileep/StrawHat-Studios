@@ -21,14 +21,14 @@ function siteConfigPlugin() {
         name: SITE.name,
         url: SITE.url,
         email: SITE.email,
-        description: 'Web design, front-end development, and technical SEO for small businesses.',
+        description: SITE.description,
         areaServed: 'Worldwide',
         makesOffer: [
-          { '@type': 'Offer', name: 'Web Design' },
-          { '@type': 'Offer', name: 'Front-End Development' },
-          { '@type': 'Offer', name: 'Technical SEO' },
+          { '@type': 'Offer', name: 'Custom Website Design & Development' },
+          { '@type': 'Offer', name: 'Landing Pages' },
+          { '@type': 'Offer', name: 'Post-Launch Website Support' },
         ],
-        sameAs: [SITE.github, SITE.linkedin],
+        sameAs: [SITE.linkedin],
       })
 
       return html
@@ -57,6 +57,11 @@ function siteConfigPlugin() {
 
 export default defineConfig({
   plugins: [react(), siteConfigPlugin()],
+  server: {
+      allowedHosts: [
+        'trouble-unsettled-deny.ngrok-free.dev'
+    ],
+  },
   build: {
     // Keep the heavy, conditionally-loaded 3D chunks OUT of <head> modulepreload
     // so mobile / reduced-motion / no-WebGL visitors never download Three.js.
